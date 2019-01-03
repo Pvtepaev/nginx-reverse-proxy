@@ -1,0 +1,36 @@
+version: '2'
+
+networks:
+  lokinet:
+    external:
+      name: lokinet
+
+services:
+  nginx-proxy:
+    networks:
+      - lokinet
+    restart: always
+    image: jwilder/nginx-proxy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./certs:/etc/nginx/certs:ro
+      - ./vhost.d:/etc/nginx/vhost.d
+      - ./html:/usr/share/nginx/html
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+      - ./local-config:/etc/nginx/conf.d
+      - ./nginx.tmpl:/app/nginx.tmpl
+      - ./log:/var/log/nginx
+    labels:
+      - "com.github.jrcs.letsencrypt_nginx_proxy_companion.nginx_proxy=true"
+
+# letsencrypt-dns:
+#   image: adferrand/letsencrypt-dns
+#   volumes:
+#     - ./certs/letsencrypt:/etc/letsencrypt
+#   environment:
+#     - "LETSENCRYPT_USER_MAIL=MAIL@MAIL.COM"
+#     - "LEXICON_PROVIDER=cloudns"
+#     - "LEXICON_OPTIONS=--delegated NAS.cloudns.cc"
+#     - "LEXICON_PROVIDER_OPTIONS=--auth-id=CLOUDNS_ID --auth-password=CLOUDNS_PASSWORD"
